@@ -1,2 +1,46 @@
 # Web-Scrap
 Created By : SUBASRI R
+
+#Project - Web scraper using BeautifulSoup4 and request
+
+import requests
+from bs4 import BeautidulSoup
+import pandas
+
+oyo_url = "https://www.oyorooms.com/hotels-in-banglore/?page="
+
+page_num_MAX = 3
+scraped_info_list = []
+
+for page_num in rage (1,page_num_MAX):
+	req = request.get(oyo_url + str(page_num))
+	content = request.content
+	
+	soup = BeautifulSoup(content,"html.parser")
+	all_hotels = soup.find_all("div",{"class": "hotelCardListing"})
+	
+	for hotel in all_hotels:
+		hotel_dict = {}
+		hotel_dict["name"] = hotel.find("h",{"class": "listingHotelDescription__hotelName"}).text
+		hotel_dict["address"] =  hotel.find("span",{"itemprop": "streetAddress"}).text
+		hotel_dict["price"] =  hotel.find("span",{"class":"listingPrice__finalPrice"}).text
+		
+		try:
+			hotel_dict["rating"] = hotel.find("span",{"class": "hotelRating__ratingSummary"}).text
+			
+		except AttributeError :
+				 pass
+				 
+				 parent_amenities_element = hotel.find("div",{"class": "amenity"})
+				 
+				 amenities_list = [ ]
+				 
+				 for amenity in parent_amenities_element.find_all("div",{"class":"amenityWrapper__amenity"}):
+				  	amenities_list.append(amenity.find("span",{"class": "d-body-sm"}).text.strip())
+				  	
+				  	hotel_dict["amenities"] = ', '.join(amenities_list[:-1])
+				  	
+				  	scraped_info_list.append(hotel_dict)
+	     
+dataFrame = pandas.DataFrame(scraped_info_list)
+dataFrame.to_csv("Oyo.csv")
